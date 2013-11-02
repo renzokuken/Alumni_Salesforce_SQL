@@ -6,17 +6,21 @@ GO
 DECLARE @Universal_Cohort AS INT
 SET @Universal_Cohort = 2016
 
---Switch to pull academic data completeness
-DECLARE @Summarize_Academic_Data AS BIT
-SET @Summarize_Academic_Data = 1
+DECLARE @Year AS INT
+SET @Year = 8
 
---Switch to pull application data completeness
-DECLARE @Summarize_Application_Data AS BIT
-SET @Summarize_Application_Data = 1
+DECLARE @Print_Year AS INT
+SET @Print_Year = 2008
 
---Switch to pull financial data completeness
-DECLARE @Summarize_Financial_Data AS BIT
-SET @Summarize_Financial_Data = 1
+DECLARE @Enroll AS INT
+SET @Enroll = 0
+
+CREATE TABLE #tt_Report (
+ Academic_Year INT
+,College_Enrollment INT
+)
+
+
 
 --Create region lookup to crosswalk datasets.
 CREATE TABLE #tt_Region_Lookup (
@@ -370,23 +374,31 @@ SELECT C.Id
   LEFT JOIN #tt_Alum_College E
   ON A.Id = E.Student__c
   
-  SELECT Id
-  ,COUNT(Id) AS N_Records 
+  WHILE @Year < 14
+  BEGIN
+  
+  INSERT INTO #tt_Report(Academic_Year, College_Enrollment)
+  VALUES(
+  (@Print_Year + 1)
+  ,(SELECT COUNT(DISTINCT Id)
   FROM #tt_College_Enrollment
-  WHERE Start_Date__c <= '10-1-13'
-  AND Actual_End_Date__c IS NULL
-  --FFFFFFFFFFFFFFUUUUUUUUUUUUUU...
+  WHERE Start_Date__c <= '10-1-' + CAST(@YEAR AS VARCHAR(2))
+  AND (Actual_End_Date__c IS NULL OR Actual_End_Date__c < '10-1-' + CAST((@Year + 1) AS Varchar(2)))
   AND Status__c NOT IN (
    'Transferred out'
   ,'Withdrawn'
   ,'Graduated'
   ,'Other'
   )
-  GROUP BY
-  Id
+  )
+  )
   
-  ORDER BY N_Records DESC
+  SET @Year = @Year + 1
+  SET @Print_Year = @Print_Year + 1
+    
+  END
   
+  SELECT * FROM #tt_Report
   
   DROP TABLE #tt_Region_Lookup
   DROP TABLE #tt_8th_Grade_Cohort
@@ -396,4 +408,4 @@ SELECT C.Id
   DROP TABLE #tt_All_Alums
   DROP TABLE #tt_Alum_College
   DROP TABLE #tt_College_Enrollment
-  
+  DROP TABLE #tt_Report

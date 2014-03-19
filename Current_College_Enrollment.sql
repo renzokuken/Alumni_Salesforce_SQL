@@ -330,6 +330,7 @@ SELECT C.Id
   ,E.Start_Date__c
   ,E.Status__c
   ,E.Actual_End_Date__c
+  ,E.Pursuing_Degree_Type__c
   INTO #tt_Alum_College
   FROM Enrollment__c E
   JOIN Account A
@@ -369,6 +370,7 @@ SELECT C.Id
   ,E.Start_Date__c
   ,E.Status__c
   ,E.Actual_End_Date__c
+  ,E.Pursuing_Degree_Type__c
   INTO #tt_College_Enrollment
   FROM #tt_All_Alums A
   LEFT JOIN #tt_Alum_College E
@@ -390,6 +392,13 @@ SELECT C.Id
   ,'Graduated'
   ,'Other'
   )
+  --AND (
+  --Pursuing_Degree_Type__c IN (
+  -- 'Bachelor''s (4-year)'
+  --,'Associate''s (2 year)'
+  --)
+  --OR Pursuing_Degree_Type__c IS NULL
+  --)
   )
   )
   
